@@ -1,4 +1,6 @@
-QuintOS.level = 7; // type of computer
+QuintOS.level = 8; // type of computer
 QuintOS.dir = "GAMES"; // . means the same directory as the QuintOS.html file
-QuintOS.gameSelect = "snake_swapMode";
+// QuintOS.gameSelect = "Sokoban";
+QuintOS.username = "Paeto-Chayarat";
+QuintOS.preload = true;
 // QuintOS.gameSelect = 'game'; // name of the game file
