@@ -1,67 +1,52 @@
-let player = createSprite(314, 80, 32, 32);
-player.scale = 0.5;
-player.autoResetAnimations = true;
-let imgDir = QuintOS.dir + "/img/8bit";
-let playerImg = imgDir + "/player16.png";
+// image assets location
+let imgDir = QuintOS.dir + "/img/bitBoi";
 
-// loadAni(sprite, spritesheet, name, width, height, frameCount, line, frameDelay)
-loadAni(player, playerImg, "idle-stand", 64, 64, 4, 0, 20);
-loadAni(player, playerImg, "idle-blink", 64, 64, 4, 1, 10);
-loadAni(player, playerImg, "idle-think", 64, 64, 8, 20, 20);
-loadAni(player, playerImg, "idle-scratch", 64, 64, 14, 21, 10);
-loadAni(player, playerImg, "idle-yawn", 64, 64, 2, 22, 60);
-loadAni(player, playerImg, "idle-turn", 64, 64, 3, 17);
-loadAni(player, playerImg, "walk-lr", 64, 64, 5, 3, 5);
-loadAni(player, playerImg, "walk-up", 64, 64, 6, 18);
-loadAni(player, playerImg, "walk-down", 64, 64, 6, 16);
+/* WORLD */
 
-let tiles = imgDir + "/world.png";
+//    new Tiles(rows, cols, layers, tileSize, x, y)
+let world = new Tiles(40, 12, 2, 16, 60, 55);
+world.spriteSheet = loadImage(imgDir + "/world16.png");
 
-function loadAni2(spriteSheetImg, size, pos, frameCount, frameDelay) {
-	// pos is a line number or tile coordinate pair
-	let frames = [];
+world.addGroup("walls");
+world.walls.loadAni("wall-up", { pos: [0, 1] });
+world.walls.loadAni("wall-down", { pos: [2, 1] });
+world.walls.loadAni("wall-left", { pos: [1, 0] });
+world.walls.loadAni("wall-right", { pos: [1, 2] });
+world.walls.loadAni("wall-topleft", { pos: [0, 0] });
+world.walls.loadAni("wall-topright", { pos: [0, 2] });
+world.walls.loadAni("wall-bottomleft", { pos: [2, 0] });
+world.walls.loadAni("wall-bottomright", { pos: [2, 2] });
 
-	let width, height;
-	if (typeof size == "number") {
-		width = size;
-		height = size;
-	} else {
-		width = size[0];
-		height = size[1];
-	}
+world.addGroup("boxes");
+// loads the animation for the tile representing the box
+// at row 5, column 0 in the tile sheet
+world.boxes.loadAni("box", { pos: [5, 0] });
 
-	// add all the frames in the animation to the frames array
-	for (let i = 0; i < frameCount; i++) {
-		let x, y;
-		// if pos is a number, that means it's just a line number
-		// and the animation's first frame is at x = 0
-		// the line number is the location of the animation line
-		// given as a distance in tiles from the top of the image
-		if (typeof pos == "number") {
-			x = width * i;
-			y = height * pos;
-		} else {
-			// pos is the location of the animation line
-			// given as a coordinate pair of distances in tiles
-			// from the top left corner of the image
-			x = width * (i + pos[0]);
-			y = height * pos[1];
-		}
+/* PART A: Choose a tile to represent the box goal positions on the floor */
+world.addGroup("goals");
+world.goals.loadAni("goal", { pos: [15, 1] });
 
-		frames.push({
-			frame: { x: x, y: y, width: width, height: height },
-		});
-	}
-	let ani = loadAnimation(new SpriteSheet(spriteSheetImg, frames));
-	if (typeof frameDelay != "undefined") {
-		ani.frameDelay = frameDelay;
-	}
-	return ani;
+/* PLAYER */
+
+//               tile(row, col, layer)
+let player = world.tile(0, 0, 1);
+player.spriteSheet = loadImage(imgDir + "/bitBoi16.png");
+
+player.loadAni("idle-stand", { line: 0, frames: 4, delay: 20 });
+player.loadAni("idle-blink", { line: 1, frames: 4, delay: 10 });
+player.loadAni("idle-think", { line: 20, frames: 8, delay: 20 });
+player.loadAni("idle-scratch", { line: 21, frames: 14, delay: 10 });
+player.loadAni("idle-yawn", { line: 22, frames: 2, delay: 60 });
+player.loadAni("idle-turn", { line: 17, frames: 3 });
+player.loadAni("walk-lr", { line: 3, frames: 5, delay: 5 });
+player.loadAni("walk-up", { line: 18, frames: 6 });
+player.loadAni("walk-down", { line: 16, frames: 6 });
+
+let levelSet;
+
+async function getJson() {
+	let req = await fetch(QuintOS.dir + "/levels.json");
+	levelSet = await req.json();
 }
 
-let tileSize = 32;
-
-let wallUp = loadAni2(tiles, tileSize, [1, 0]);
-let wallLeft = loadAni2(tiles, tileSize, [0, 1]);
-let wallRight = loadAni2(tiles, tileSize, [2, 1]);
-let wallDown = loadAni2(tiles, tileSize, [1, 2]);
+getJson();

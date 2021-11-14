@@ -1,21 +1,21 @@
 {
-	"author": "quinton-ashley",
-	"name": "quintos-template",
+	"author": "Paeto-Chayarat",
+	"name": "quintos-games",
 	"description": "Learn to code by making games in JavaScript using QuintOS!",
 	"dependencies": {
+		"java2js": "^1.0.7",
 		"jquery": "^3.6.0",
 		"p5": "^1.4.0",
-		"quintos": "^1.6.74"
+		"quintos": "^2.0.4"
 	},
 	"license": "GPL-3.0-only",
 	"main": "server.js",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/quinton-ashley/quintos-template.git"
+		"url": "git+https://github.com/Paeto-Chayarat/quintos-games.git"
 	},
 	"scripts": {
-		"start": "node server.js | open http://127.0.0.1:8080",
-		"start_x": "node ./node_modules/quintos/server.js | open http://127.0.0.1:8081",
+		"start": "node ./node_modules/quintos/server.js | open http://127.0.0.1:8081",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",
@@ -23,5 +23,5 @@
 		"postversion": "git push",
 		"relink": "npm link ../../pkg/quintos"
 	},
-	"version": "1.0.13"
+	"version": "1.0.14"
 }
