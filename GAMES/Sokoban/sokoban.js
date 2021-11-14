@@ -1,33 +1,55 @@
 let loading = true;
 
 let board = [];
-let level = levelSet.levels[2];
-level = level.split("\n");
-for (let row = 0; row < level.length; row++) {
-	board.push(level[row].split(""));
-}
+let levelNum = 2;
 
-for (let row = 0; row < board.length; row++) {
-	for (let col = 0; col < board[row].length; col++) {
-		let t = board[row][col];
-		if (t == "#") {
-			world.walls.tile(row, col, "wall-up");
-		}
-		if (t == "$" || t == "*") {
-			world.boxes.tile(row, col, 1, "box");
-		}
-		if (t == "." || t == "*" || t == "+") {
-			world.goals.tile(row, col, "goal");
-		}
-		if (t == "@" || t == "+") {
-			player.row = row;
-			player.col = col;
-			player.destRow = row;
-			player.destCol = col;
-			player.x = world.x + col * world.tileSize;
-			player.y = world.y + row * world.tileSize;
+player.steps = 0;
+
+function loadLevel(level) {
+	level = level.split("\n");
+	for (let row = 0; row < level.length; row++) {
+		board.push(level[row].split(""));
+	}
+
+	for (let row = 0; row < board.length; row++) {
+		for (let col = 0; col < board[row].length; col++) {
+			let t = board[row][col];
+			if (t == "#") {
+				world.walls.tile(row, col, "wall-up");
+			}
+			if (t == "$" || t == "*") {
+				world.boxes.tile(row, col, 1, "box");
+			}
+			if (t == "." || t == "*" || t == "+") {
+				world.goals.tile(row, col, "goal");
+			}
+			if (t == "@" || t == "+") {
+				player.row = row;
+				player.col = col;
+				player.destRow = row;
+				player.destCol = col;
+				player.x = world.x + col * world.tileSize;
+				player.y = world.y + row * world.tileSize;
+			}
 		}
 	}
+}
+
+loadLevel(levelSet.levels[levelNum]);
+
+function displayLevel() {
+	text("level " + levelNum, 3, 20);
+}
+displayLevel();
+
+button("Reset", 0, 22, resetBoard);
+
+function resetBoard() {
+	world.walls.removeSprites();
+	world.boxes.removeSprites();
+	world.goals.removeSprites();
+	board = [];
+	loadLevel(levelSet.levels[levelNum]);
 }
 
 function keyPressed() {
@@ -84,6 +106,11 @@ function moveBox(r1, c1, r2, c2) {
 	return false;
 }
 
+function displaySteps() {
+	text("steps " + player.steps, 3, 5);
+}
+displaySteps();
+
 player.walk = async function (direction) {
 	let r = player.row;
 	let c = player.col;
@@ -133,6 +160,9 @@ player.walk = async function (direction) {
 	displayBoard();
 
 	world.move(player, 0.85, direction);
+
+	player.steps++;
+	displaySteps();
 
 	// the name of the current animation being used
 	let cur = this.getAnimationLabel();
@@ -200,7 +230,7 @@ player.idle = function () {
 function checkWin() {
 	for (let i = 0; i < board.length; i++) {
 		for (let j = 0; j < board[i].length; j++) {
-			if (board[i][j] == ".") {
+			if (board[i][j] == "." || board[i][j] == "+") {
 				return false;
 			}
 		}
