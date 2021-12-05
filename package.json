@@ -3,10 +3,10 @@
 	"name": "quintos-games",
 	"description": "Learn to code by making games in JavaScript using QuintOS!",
 	"dependencies": {
-		"java2js": "^1.0.7",
+		"java2js": "^1.0.10",
 		"jquery": "^3.6.0",
 		"p5": "^1.4.0",
-		"quintos": "^2.0.4"
+		"quintos": "^2.0.17"
 	},
 	"license": "GPL-3.0-only",
 	"main": "server.js",
@@ -23,5 +23,5 @@
 		"postversion": "git push",
 		"relink": "npm link ../../pkg/quintos"
 	},
-	"version": "1.0.15"
+	"version": "1.0.16"
 }
