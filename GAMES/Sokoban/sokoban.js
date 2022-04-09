@@ -10,7 +10,10 @@ player.steps = 0;
 let moves = [];
 
 async function loadMenu() {
+	player.steps = 0;
 	resetBoard();
+	walls.removeSprites();
+	floor.removeSprites();
 	displayLevel();
 	levelNum = await prompt("Select level (0-110): ", 9, 7, 26);
 	moves = [levelSet.levels[levelNum]];
@@ -25,17 +28,22 @@ function undo() {
 	if (moves.length <= 1) {
 		return;
 	}
+	player.steps--;
 	resetBoard();
 	moves.pop();
 	loadLevel(moves[moves.length - 1], true); // load it again
 }
 
-button("Undo", 2, 24, undo);
-
-button("Reset", 2, 29, () => {
+function reset() {
+	player.steps = 0;
+	moves = [levelSet.levels[levelNum]];
 	resetBoard();
 	loadLevel(levelSet.levels[levelNum], true); // load it again
-});
+}
+
+button("Undo", 2, 24, undo);
+
+button("Reset", 2, 29, reset);
 
 button("Menu", 2, 35, loadMenu);
 
@@ -47,21 +55,17 @@ function displaySteps() {
 	text("steps " + ("" + player.steps).padStart(3, "0"), 2, 10);
 }
 
-let objects = [];
-
 function loadLevel(level, doReset) {
 	level = level.slice(0, -1).split("\n");
 	for (let row = 0; row < level.length; row++) {
 		board.push(level[row].split(""));
 	}
 
-	let objectNum = 0;
-
 	for (let row = 0; row < board.length; row++) {
 		for (let col = 0; col < board[row].length; col++) {
 			let t = board[row][col];
 			if (t == "#") {
-				let img = "wall-up";
+				let img = "";
 
 				if (col == 0 && row == 0) {
 					img = "wall-topleft";
@@ -79,15 +83,12 @@ function loadLevel(level, doReset) {
 					img = "wall-down";
 				} else if (row == 0) {
 					img = "wall-up";
-				} else if (doReset) {
-					img = objects[objectNum];
-					objectNum++;
-				} else {
-					let num = Math.floor(Math.random() * 15);
+				} else if (!doReset) {
+					let num = Math.floor(Math.random() * 10);
 					img = "furniture-" + num;
-					objects.push(img);
 				}
-				walls.createSprite(img, row, col);
+
+				if (img) walls.createSprite(img, row, col);
 			}
 			if (t == "$" || t == "*") {
 				let box = boxes.createSprite("box", row, col, 1);
@@ -106,6 +107,14 @@ function loadLevel(level, doReset) {
 				player.row = row;
 				player.col = col;
 			}
+			if (t == " " && !doReset) {
+				// make animal maybe
+				let rand = Math.random();
+				if (rand < 0.5) {
+					let num = Math.floor(Math.random() * 16);
+					floor.createSprite("floor-" + num, row, col);
+				}
+			}
 		}
 	}
 
@@ -113,9 +122,7 @@ function loadLevel(level, doReset) {
 }
 
 function resetBoard() {
-	player.steps = 0;
 	displaySteps();
-	walls.removeSprites();
 	boxes.removeSprites();
 	goals.removeSprites();
 	board = [];
@@ -127,19 +134,18 @@ function keyPressed() {
 	if (key == "u") {
 		undo();
 	} else if (key == "r") {
-		resetBoard();
-		loadLevel(levelSet.levels[levelNum], true); // load it again
+		reset();
 	} else if (key == "m") {
 		loadMenu();
 	}
-	if (player.isMoving) return;
-	if (keyCode === UP_ARROW) {
+
+	if (key == "ArrowUp") {
 		player.walk("up");
-	} else if (keyCode === DOWN_ARROW) {
+	} else if (key == "ArrowDown") {
 		player.walk("down");
-	} else if (keyCode === LEFT_ARROW) {
+	} else if (key == "ArrowLeft") {
 		player.walk("left");
-	} else if (keyCode === RIGHT_ARROW) {
+	} else if (key == "ArrowRight") {
 		player.walk("right");
 	}
 }
@@ -187,6 +193,8 @@ function moveBox(r1, c1, r2, c2) {
 }
 
 player.walk = async function (direction) {
+	if (player.isWalking) return;
+	player.isWalking = true;
 	let r = player.row;
 	let c = player.col;
 
@@ -214,14 +222,7 @@ player.walk = async function (direction) {
 		if (canMoveBox == false) return;
 
 		if (canMoveBox) aniName = "push" + aniName.slice(4);
-	}
 
-	// for (let i = 0; i < boxes.length; i++) {
-	// 	let box = boxes[i];
-	// 	board[box.row][box.col] = "$";
-	// }
-
-	if (inGame) {
 		if (board[player.row][player.col] == "+") {
 			board[player.row][player.col] = ".";
 		} else {
@@ -237,11 +238,7 @@ player.walk = async function (direction) {
 			moveOnBoard(player.row, player.col + 1);
 		}
 		moves.push(displayBoard());
-	}
 
-	player.move(direction, 0.85);
-
-	if (inGame) {
 		player.steps++;
 		displaySteps();
 	}
@@ -269,6 +266,8 @@ player.walk = async function (direction) {
 		player.mirrorX(1);
 	}
 
+	await player.move(direction, 0.85);
+
 	if (inGame && checkWin()) {
 		didWin = true;
 		player.ani("dance");
@@ -276,9 +275,15 @@ player.walk = async function (direction) {
 		didWin = false;
 		levelNum++;
 		displayLevel();
+		player.steps = 0;
+		displaySteps();
 		resetBoard();
+		walls.removeSprites();
+		floor.removeSprites();
 		loadLevel(levelSet.levels[levelNum]);
 	}
+
+	player.isWalking = false;
 };
 
 player.idle = function () {
@@ -331,6 +336,19 @@ function checkWin() {
 
 loading = false;
 
+// walking bug fixed!
+
+// async function simulateGlitch() {
+// 	await delay(500);
+// 	dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+// 	dispatchEvent(new KeyboardEvent("keyup", { key: "ArrowDown" }));
+// 	await delay(102);
+// 	dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+// 	dispatchEvent(new KeyboardEvent("keyup", { key: "ArrowRight" }));
+// }
+
+// simulateGlitch();
+
 function draw() {
 	if (loading) return;
 	clear();
@@ -338,6 +356,8 @@ function draw() {
 
 	player.collide(walls); // handles player collisions with walls
 	player.displace(boxes);
+	boxes.displace(creatures);
+	creatures.collide(walls);
 	boxes.snap(player);
 	boxes.collide(walls);
 	boxes.collide(boxes);

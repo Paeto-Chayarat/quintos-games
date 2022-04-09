@@ -2,7 +2,6 @@
 let imgDir = QuintOS.dir + "/img/bitBoi";
 
 /* WORLD */
-
 //      createTiles(tileSize, x, y)
 let world = createTiles(16, 90, 40);
 world.spriteSheet = loadImage(imgDir + "/world16.png");
@@ -19,23 +18,31 @@ walls.loadAni("wall-bottomright", { pos: [2, 2] });
 
 walls.loadAni("fire", { pos: [19, 2], frames: 2, delay: 10 });
 
-for (let i = 0; i < 16; i++) {
-	walls.loadAni("creature-" + i, { pos: [10, i] });
-}
-walls.loadAni("creature-16", { pos: [22, 4] });
-walls.loadAni("creature-17", { pos: [22, 5] });
-walls.loadAni("creature-18", { pos: [22, 6] });
-walls.loadAni("creature-19", { pos: [22, 7] });
-walls.loadAni("creature-20", { pos: [22, 0], frames: 4, delay: 20 });
-
 {
 	let i = 0;
-	for (let row = 16; row < 21; row++) {
+	for (let row = 17; row < 20; row++) {
 		for (let col = 13; col < 16; col++) {
 			walls.loadAni("furniture-" + i, { pos: [row, col] });
 			i++;
 		}
 	}
+}
+walls.loadAni("furniture-6", { pos: [16, 13] });
+walls.loadAni("furniture-7", { pos: [19, 15] });
+walls.loadAni("furniture-8", { pos: [20, 13] });
+walls.loadAni("furniture-9", { pos: [20, 14] });
+
+let creatures = world.createGroup("creatures");
+for (let i = 0; i < 16; i++) {
+	creatures.loadAni("creature-" + i, { pos: [10, i] });
+}
+for (let i = 0; i < 8; i++) {
+	creatures.loadAni("creature-" + (i + 16), { pos: [22, i] });
+}
+
+let floor = world.createGroup("floor");
+for (let i = 0; i < 16; i++) {
+	floor.loadAni("floor-" + i, { pos: [20 + Math.floor(i / 8), i % 8] });
 }
 
 let boxes = world.createGroup("boxes");
@@ -50,7 +57,7 @@ goals.loadAni("goal", { pos: [15, 1] });
 /* PLAYER */
 
 //                 createSprite(row, col, layer)
-let player = world.createSprite(5, 5, 1);
+let player = world.createSprite(5, 5, 2);
 player.spriteSheet = loadImage(imgDir + "/bitBoi16.png");
 
 player.loadAni("idle-stand", { line: 0, frames: 4, delay: 20 });

@@ -71,7 +71,6 @@ let food = {
 	y: 0,
 };
 let inputDirection = "right";
-let frameTrack = -1;
 let isSnakeDead = false;
 let friction = 10; // decrease to increase snake speed
 // increase speed gradually
@@ -175,7 +174,6 @@ function keyPressed() {
 		} else if (keyCode == RIGHT_ARROW && snake.head.direction != "left") {
 			inputDirection = "right";
 		}
-		frameTrack = frameCount;
 	}
 	return false;
 }

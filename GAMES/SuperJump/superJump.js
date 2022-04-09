@@ -1,6 +1,4 @@
 // screen width is 640, height is 400
-const log = console.log;
-
 let imgBall = spriteArt(`
 ..bbby
 .wbbbyb
@@ -121,8 +119,8 @@ function draw() {
 		if (!restarting) restart();
 		return;
 	}
-	pc.text("score", 35, 2);
-	pc.text(score, 36, 4);
+	text("score", 35, 2);
+	text(score, 36, 4);
 	background(0);
 	// if score exceed 500, increase distance btw plat
 	if (score > 500 && levelProgress == 0) {
@@ -197,8 +195,8 @@ function reachNext() {
 
 async function restart() {
 	restarting = true;
-	await pc.alert("Game over", 10, 10, 10);
-	await pc.erase(); // erase whole screen
+	await alert("Game over", 10, 10, 10);
+	await erase(); // erase whole screen
 
 	// reset all variables
 	levelProgress = 0;
